@@ -20,6 +20,9 @@ const FeatureItem = ({ icon, heading, content }) => {
 export default function Home() {
   return (
     <main>
+      <Head>
+        <title>Swift Chat</title>
+      </Head>
       <section className="hero my-10 bg-white">
         <div className="container flex flex-wrap">
           <div className="w-full lg:w-1/2">
@@ -30,7 +33,7 @@ export default function Home() {
             </p>
 
             <div className="button-container flex gap-3 my-5">
-              <Link href={"/login"}>
+              <Link href={"/signin"}>
                 <button className="text-white bg-accent text-lg rounded px-2 py-2 min-w-[120px] font-bold">Get Started</button>
               </Link>
 

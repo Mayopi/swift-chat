@@ -1,9 +1,8 @@
-"use client";
+import React from "react";
 import Link from "next/link";
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
-import { useSession, signIn, signOut } from "next-auth/react";
-import LoginButton from "../shared/login-btn";
+import { useSession, signIn, signOut, getSession } from "next-auth/react";
 
 Chart.register(...registerables);
 
@@ -80,20 +79,42 @@ const LoginPage = () => {
             <hr className="boder-t border-accent lg:w-2/3 w-full mt-5 opacity-60" />
 
             {session ? (
-              <div className="lg:w-2/3 mt-5">
-                <p className="text-subtext text-center mb-3">Signed in as {session.user.email}</p>
-                <button className="text-white bg-danger w-full min-h-[40px] rounded py-2 px-2 font-bold uppercase tracker-wider text-xl" onClick={() => signOut()}>
-                  Sign Out <i className="fa-solid fa-right-from-bracket"></i>
+              <>
+                <p className="text-subtext font-bold">You are already Signed In as {session.user.name}</p>
+                <p className="text-subtext">
+                  You can access the dashboard{" "}
+                  <Link className="text-accent" href="/dashboard">
+                    here
+                  </Link>
+                </p>
+                <button type="button" onClick={() => signOut()} className="mt-5 bg-accent text-white font-bold py-2 px-4 rounded cursor-pointer">
+                  Sign Out
                 </button>
-              </div>
+              </>
+            ) : status === "loading" ? (
+              <p>Loading...</p>
             ) : (
-              <LoginButton signIn={signIn} />
+              <>
+                <button
+                  type="button"
+                  onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                  className="mt-5 bg-white text-accent hover:bg-accent hover:text-white transition border border-accent font-bold py-2 px-4 rounded cursor-pointer w-full lg:w-2/3"
+                >
+                  <i className="fab fa-google fa-xl"></i> Sign In with Google
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => signIn("discord", { callbackUrl: "/dashboard" })}
+                  className="mt-5 bg-accent text-white hover:bg-white hover:text-accent border border-accent transition font-bold py-2 px-4 rounded cursor-pointer w-full lg:w-2/3"
+                >
+                  <i className="fab fa-discord fa-xl"></i> Sign In with Discord
+                </button>
+              </>
             )}
           </form>
         </div>
-
-        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center mt-10 lg:mt-0">
-          <h1 className="text-primary text-xl">Total User</h1>
+        <div className="w-full lg:w-1/2 mt-5 lg:mt-0">
           <UserChart />
         </div>
       </div>
