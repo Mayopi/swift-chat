@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { useSession, signIn, signOut, getSession } from "next-auth/react";
+import Skeleton from "react-loading-skeleton";
 
 Chart.register(...registerables);
 
@@ -92,7 +93,9 @@ const LoginPage = () => {
                 </button>
               </>
             ) : status === "loading" ? (
-              <p>Loading...</p>
+              <div className="w-full lg:w-2/3">
+                <Skeleton count={2} />
+              </div>
             ) : (
               <>
                 <button
@@ -121,5 +124,21 @@ const LoginPage = () => {
     </main>
   );
 };
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  if (!session) {
+    return {
+      props: {},
+    };
+  }
+
+  return {
+    redirect: {
+      destination: "/dashboard",
+    },
+  };
+}
 
 export default LoginPage;

@@ -5,6 +5,8 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
+import DashboardSideBar from "@/shared/sidebar";
+
 const Dashboard = ({ session }) => {
   const { status } = useSession();
   const router = useRouter();
@@ -21,18 +23,7 @@ const Dashboard = ({ session }) => {
   if (status === "authenticated") {
     return (
       <main>
-        <div className="container">
-          <p>Dashboard</p>
-          <div className="w-full my-5">
-            <h1 className="text-xl text-primary font-medium">{session?.user?.name || "undefined"}</h1>
-            <Image src={session?.user?.image || ""} width={100} height={100} className="rounded-full" alt="profile picture" />
-            <p>{session?.provider?.name || "loading..."}</p>
-          </div>
-
-          <button className="text-white bg-danger px-2 py-2 min-w-[120px]" onClick={() => signOut()}>
-            Sign Out as {session?.user?.email || "undefined"}
-          </button>
-        </div>
+        <DashboardSideBar session={session} />
       </main>
     );
   } else if (status === "loading") {
@@ -63,7 +54,7 @@ const addProvider = (session) => {
   }
 };
 
-const saveUser = async (session, url = "http://localhost:3000") => {
+const saveUser = async (session, url = process.env.NEXTAUTH_URL) => {
   try {
     const userExistence = await checkUser(session.user.email);
     if (userExistence.status === 404) {
@@ -85,7 +76,7 @@ const saveUser = async (session, url = "http://localhost:3000") => {
   }
 };
 
-const checkUser = async (email, url = "http://localhost:3000") => {
+const checkUser = async (email, url = process.env.NEXTAUTH_URL) => {
   try {
     const res = await axios.get(`${url}/api/account`, {
       params: {
