@@ -2,16 +2,24 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/router";
 
 const DashboardSideBar = ({ session }) => {
   const [open, setOpen] = useState(true);
   const [search, setSearch] = useState("");
 
+  const { asPath } = useRouter();
+
   const menus = [
+    {
+      title: "Dashboard",
+      icon: "home",
+      link: "/dashboard",
+    },
     {
       title: "Messages",
       icon: "message",
-      link: "/dashboard/message",
+      link: "/dashboard/messages",
     },
 
     {
@@ -76,7 +84,7 @@ const DashboardSideBar = ({ session }) => {
           {filteredMenu !== ""
             ? filteredMenu.map((item, index) => (
                 <Link href={item.link} key={index}>
-                  <div className={`items flex gap-2 text-white ${open ? "px-2.5 py-2" : "px-5 py-4"} rounded hover:bg-subtext cursor-pointer hover:bg-opacity-50`}>
+                  <div className={`items flex gap-2 text-white ${open ? "px-2.5 py-2" : "px-5 py-4"} rounded ${asPath === item.link ? "bg-subtext" : "bg-transparent"} hover:bg-subtext cursor-pointer hover:bg-opacity-50 bg-opacity-70`}>
                     <button>
                       <i className={`fa-solid fa-${item.icon} ${open ? "text-lg" : "text-2xl"} duration-300`}></i>
                     </button>
@@ -86,7 +94,7 @@ const DashboardSideBar = ({ session }) => {
               ))
             : menus.map((menu, index) => (
                 <Link href={menu.link} key={index}>
-                  <div className={`items flex gap-2 text-white ${open ? "px-2.5 py-2" : "px-5 py-4"} rounded hover:bg-subtext cursor-pointer hover:bg-opacity-50`}>
+                  <div className={`items flex gap-2 text-white ${open ? "px-2.5 py-2" : "px-5 py-4"} rounded ${asPath === item.link ? "bg-subtext" : "bg-transparent"} hover:bg-subtext cursor-pointer hover:bg-opacity-50`}>
                     <button>
                       <i className={`fa-solid fa-${menu.icon} ${open ? "text-lg" : "text-2xl"} duration-300`}></i>
                     </button>

@@ -1,14 +1,14 @@
 import DashboardSideBar from "@/shared/sidebar";
 import { getSession } from "next-auth/react";
 
-const MessagesPage = ({ session }) => {
+const UserPage = ({ session }) => {
   return (
     <main>
       <div className="flex">
         <DashboardSideBar session={session} />
 
         <div className="container">
-          <h1>Welcome to message</h1>
+          <h1>User Page</h1>
         </div>
       </div>
     </main>
@@ -33,4 +33,4 @@ export async function getServerSideProps(context) {
   };
 }
 
-export default MessagesPage;
+export default UserPage;

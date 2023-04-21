@@ -63,8 +63,6 @@ export async function getServerSideProps({ req }) {
     user: session.user,
   });
 
-  console.log(response);
-
   return {
     props: {
       session,
