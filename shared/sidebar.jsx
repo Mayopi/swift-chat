@@ -53,7 +53,7 @@ const DashboardSideBar = ({ session }) => {
 
         {/* Search Box */}
 
-        <div className={`p-3 m-2 ${open ? "bg-subtext" : "bg-inherit m-0"} bg-opacity-50 text-white rounded-full flex gap-2 items-center mt-5`}>
+        <div className={`p-3 ${open ? "bg-subtext m-2" : "bg-inherit m-0"} bg-opacity-50 text-white rounded-full flex gap-2 items-center mt-5`}>
           <button onClick={() => document.getElementById("searchInput").focus()} className={`${open ? "" : "hover:bg-subtext px-3 py-3 rounded"} duration-300`}>
             <i className={`fa-solid fa-search ${open ? "texl-lg" : "text-2xl"}`}></i>
           </button>
@@ -68,7 +68,7 @@ const DashboardSideBar = ({ session }) => {
           />
         </div>
 
-        <hr className="border-t-subtext my-5 opacity-70" />
+        <hr className="border-t-subtext my-5 opacity-20" />
 
         {/* Sidebar Item */}
 
@@ -96,9 +96,9 @@ const DashboardSideBar = ({ session }) => {
               ))}
         </div>
 
-        <hr className="border-t-subtext my-5 opacity-70" />
+        <hr className="border-t-subtext my-5 opacity-20" />
 
-        <div onClick={signOut} className={`signout cursor-pointer hover:bg-subtext hover:bg-opacity-50 flex gap-2 text-white ${open ? "px-2.5 py-2" : "px-5 py-4"} items-center rounded`}>
+        <div onClick={() => signOut()} className={`signout cursor-pointer hover:bg-subtext hover:bg-opacity-50 flex gap-2 text-danger ${open ? "px-2.5 py-2" : "px-5 py-4"} items-center rounded`}>
           <i className={`fa-solid fa-right-to-bracket ${open ? "text-lg" : "text-2xl"} duration-300`}></i>
           <p className={`text-lg ${open ? "" : "hidden"}`}>Sign Out</p>
         </div>

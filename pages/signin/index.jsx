@@ -4,46 +4,69 @@ import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { useSession, signIn, signOut, getSession } from "next-auth/react";
 import Skeleton from "react-loading-skeleton";
+import axios from "axios";
+axios.defaults.baseURL = "http://127.0.0.1:3000";
 
 Chart.register(...registerables);
 
-const data = {
-  labels: ["January", "February", "March", "April", "May", "June", "July"],
-  datasets: [
-    {
-      label: "Details Per Month",
-      data: [65, 59, 80, 81, 56, 55, 40],
-      fill: false,
-      borderColor: "rgb(87, 108, 188)",
-      borderWidth: 1,
-      tension: 0.1,
+const UserChart = ({ data }) => {
+  // Mengurutkan data berdasarkan tanggal secara menaik
+  const sortedData = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+  // Memotong data menjadi 12 bulan terbaru
+  const latestData = sortedData.slice(-18);
+
+  // Menghitung jumlah user per bulan untuk data terbaru
+  const userCountsByMonth = latestData.reduce((acc, user) => {
+    const createdAt = new Date(user.createdAt);
+    const month = createdAt.toLocaleString("default", { month: "long" });
+    const year = createdAt.getFullYear();
+    const key = `${month} ${year}`;
+
+    if (!acc[key]) {
+      acc[key] = 0;
+    }
+    acc[key]++;
+
+    return acc;
+  }, {});
+
+  const chartData = {
+    labels: Object.keys(userCountsByMonth),
+    datasets: [
+      {
+        label: "Details Per Month",
+        data: Object.values(userCountsByMonth),
+        fill: false,
+        borderColor: "rgb(87, 108, 188)",
+        borderWidth: 1,
+        tension: 0.1,
+      },
+    ],
+  };
+
+  const options = {
+    interaction: {
+      mode: "index",
+      intersect: false,
     },
-  ],
+    plugins: {
+      legend: {
+        position: "top",
+      },
+    },
+    elements: {
+      point: {
+        radius: 0,
+        hitRadius: 0,
+      },
+    },
+  };
+
+  return <Line data={chartData} options={options} />;
 };
 
-const options = {
-  interaction: {
-    mode: "index",
-    intersect: false,
-  },
-  plugins: {
-    legend: {
-      position: "top",
-    },
-  },
-  elements: {
-    point: {
-      radius: 0,
-      hitRadius: 0,
-    },
-  },
-};
-
-const UserChart = () => {
-  return <Line data={data} options={options} />;
-};
-
-const LoginPage = () => {
+const LoginPage = ({ users }) => {
   const { data: session, status } = useSession();
 
   return (
@@ -118,7 +141,7 @@ const LoginPage = () => {
           </form>
         </div>
         <div className="w-full lg:w-1/2 mt-5 lg:mt-0">
-          <UserChart />
+          <UserChart data={users} />
         </div>
       </div>
     </main>
@@ -127,10 +150,20 @@ const LoginPage = () => {
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
+  const response = await axios.get("/api/account");
+
+  const modifiedUsers = response.data.users.map((user) => {
+    return {
+      username: user.username,
+      createdAt: user.createdAt.toString(),
+    };
+  });
 
   if (!session) {
     return {
-      props: {},
+      props: {
+        users: modifiedUsers,
+      },
     };
   }
 

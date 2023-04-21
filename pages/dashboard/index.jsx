@@ -2,23 +2,14 @@ import { getSession, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
+axios.defaults.baseURL = "http://127.0.0.1:3000";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 import DashboardSideBar from "@/shared/sidebar";
 
 const Dashboard = ({ session }) => {
   const { status } = useSession();
   const router = useRouter();
-
-  useEffect(() => {
-    (async function () {
-      const updatedSession = addProvider(session);
-      if (updatedSession) {
-        const result = await saveUser(updatedSession);
-      }
-    })();
-  }, []);
 
   if (status === "authenticated") {
     return (
@@ -34,7 +25,7 @@ const Dashboard = ({ session }) => {
   }
 };
 
-const addProvider = (session) => {
+const addProvider = async (session) => {
   if (session && session.user && session.user.image) {
     if (!session.provider) {
       session.provider = {};
@@ -53,47 +44,10 @@ const addProvider = (session) => {
     return session;
   }
 };
-
-const saveUser = async (session, url = process.env.NEXTAUTH_URL) => {
-  try {
-    const userExistence = await checkUser(session.user.email);
-    if (userExistence.status === 404) {
-      const user = await axios.post(`${url}/api/account`, {
-        user: session.user,
-        provider: session.provider,
-      });
-
-      console.log("response save user", user);
-
-      if (user.data.ok) {
-        return "Successfully saving User";
-      }
-    }
-    return true;
-  } catch (error) {
-    console.log(error);
-    return error.message;
-  }
-};
-
-const checkUser = async (email, url = process.env.NEXTAUTH_URL) => {
-  try {
-    const res = await axios.get(`${url}/api/account`, {
-      params: {
-        email,
-      },
-    });
-
-    return res;
-  } catch (error) {
-    return error.response.data;
-  }
-};
-
 export async function getServerSideProps({ req }) {
-  const session = await getSession({ req });
+  const rawSession = await getSession({ req });
 
-  if (!session) {
+  if (!rawSession) {
     return {
       redirect: {
         destination: "/signin",
@@ -102,9 +56,19 @@ export async function getServerSideProps({ req }) {
     };
   }
 
+  const session = await addProvider(rawSession);
+
+  const response = await axios.post("/api/account", {
+    provider: session.provider,
+    user: session.user,
+  });
+
+  console.log(response);
+
   return {
     props: {
       session,
+      data: response.data,
     },
   };
 }

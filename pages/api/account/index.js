@@ -6,28 +6,51 @@ export default async function handler(req, res) {
   try {
     if (req.method === "GET") {
       const { email } = req.query;
-      const user = await User.findOne({ email });
 
-      if (!user) {
-        return res.status(404).json({
-          message: "User Not Found",
-          status: 404,
+      if (!email) {
+        const users = await User.find();
+
+        return res.status(200).json({
+          message: "Success",
+          status: 200,
+          ok: true,
+          users,
+        });
+      } else {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+          return res.status(404).json({
+            message: "User Not Found",
+            status: 404,
+            data: user,
+            connection,
+            query: req.query,
+          });
+        }
+
+        return res.status(200).json({
+          message: "Success",
+          status: 200,
           data: user,
           connection,
-          query: req.query,
         });
       }
-
-      return res.status(200).json({
-        message: "Success",
-        status: 200,
-        data: user,
-        connection,
-      });
     }
 
     if (req.method === "POST") {
       const { user, provider } = req.body;
+
+      const existingUser = await User.findOne({ email: user.email });
+      console.log(existingUser);
+      if (existingUser) {
+        return res.status(201).json({
+          message: "Success",
+          status: 201,
+          ok: true,
+          user: existingUser,
+        });
+      }
 
       const result = await User.create({
         email: user.email,
