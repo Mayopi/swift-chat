@@ -42,7 +42,6 @@ export default async function handler(req, res) {
       const { user, provider } = req.body;
 
       const existingUser = await User.findOne({ email: user.email });
-      console.log(existingUser);
       if (existingUser) {
         return res.status(201).json({
           message: "Success",

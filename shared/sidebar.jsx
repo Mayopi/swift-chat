@@ -5,7 +5,7 @@ import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 
 const DashboardSideBar = ({ session }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const { asPath } = useRouter();
@@ -37,7 +37,7 @@ const DashboardSideBar = ({ session }) => {
 
   const filteredMenu = menus.filter((menu) => menu.title.toLowerCase().includes(search.toLowerCase()));
   return (
-    <div className="flex">
+    <div className="flex fixed z-10">
       <div className={`bg-primary h-screen ${open ? "py-5" : "py-2.5"} py-8 ${open ? "w-72" : "w-20"} duration-300`}>
         {/* Logo  */}
         <div className="p-3 hover:bg-subtext rounded cursor-pointer flex gap-2 relative">

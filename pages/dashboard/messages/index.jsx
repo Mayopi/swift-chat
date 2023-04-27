@@ -4,12 +4,8 @@ import { getSession } from "next-auth/react";
 const MessagesPage = ({ session }) => {
   return (
     <main>
-      <div className="flex">
-        <DashboardSideBar session={session} />
-
-        <div className="container">
-          <h1>Welcome to message</h1>
-        </div>
+      <div className="container">
+        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Libero doloremque iusto dicta, sequi, molestiae sapiente ut debitis nulla ab deleniti accusantium numquam iste nihil animi temporibus recusandae dolores ullam hic.</p>
       </div>
     </main>
   );
