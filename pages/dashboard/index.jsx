@@ -66,7 +66,7 @@ const Dashboard = ({ session, data, totalUser }) => {
                 <button type="submit">
                   <i className="fa-solid fa-magnifying-glass text-subtext"></i>
                 </button>
-                <input type="text" className="border h-full w-full focus:outline-none py-1 px-1" placeholder="Find People" name="email" />
+                <input type="email" className="border h-full w-full focus:outline-none py-1 px-1" placeholder="Find People" name="email" />
               </form>
             </section>
 
