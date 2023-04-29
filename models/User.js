@@ -1,53 +1,78 @@
 import { model, models, Schema } from "mongoose";
 
-const UserSchema = new Schema({
-  email: {
-    type: String,
-    unique: true,
-  },
+const UserSchema = new Schema(
+  {
+    email: {
+      type: String,
+      unique: true,
+    },
 
-  username: {
-    type: String,
-  },
-
-  password: {
-    type: String,
-  },
-
-  provider: {
-    name: {
+    username: {
       type: String,
     },
 
-    id: {
+    password: {
       type: String,
     },
-  },
 
-  images: {
-    profile: {
-      buffer: {
-        type: Buffer,
+    provider: {
+      name: {
+        type: String,
       },
 
-      url: {
+      id: {
         type: String,
       },
     },
-  },
 
-  friendRequest: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+    images: {
+      profile: {
+        buffer: {
+          type: Buffer,
+        },
+
+        url: {
+          type: String,
+        },
+      },
     },
-  ],
 
-  createdAt: {
-    type: Date,
-    default: Date.now(),
+    friends: [
+      {
+        username: String,
+        email: String,
+        closeFriend: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
+
+    friendRequest: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    notification: {
+      friendRequest: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
+
+      messages: [
+        {
+          username: String,
+          content: String,
+        },
+      ],
+    },
   },
-});
+  { timestamps: true }
+);
 
 const User = models.User || model("User", UserSchema);
 

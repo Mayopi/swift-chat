@@ -5,42 +5,16 @@ import axios from "axios";
 axios.defaults.baseURL = "http://127.0.0.1:3000";
 import { useRouter } from "next/router";
 import Modal from "react-modal";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import DashboardSideBar from "@/shared/sidebar";
 import { useState } from "react";
 
-Modal.setAppElement("#root");
+import HeaderCard from "@/shared/headerCard";
+import CloseFriendItem from "@/shared/closeFriendCard";
 
-const HeaderCard = ({ header, body, footer, icon }) => {
-  return (
-    <div className="card-items w-full lg:w-[30%] border-subtext border-dashed border-2 rounded px-2 py-2 shadow cursor-pointer">
-      <div className="card-header flex flex-wrap">
-        <h1 className="text-primary font-semibold text-xl">{header}</h1>
-      </div>
-
-      <div className="card-body">
-        <h1 className="font-bold text-accent text-2xl uppercase tracking-wider">
-          <i className={`fa-solid ${icon}`}></i> {body}
-        </h1>
-      </div>
-
-      <div className="card-footer">{footer}</div>
-    </div>
-  );
-};
-
-const CloseFriendItem = ({ session }) => {
-  return (
-    <div className="close-friend-item flex-shrink-0 cursor-pointer w-[120px] rounded border border-subtext border-dashed px-2 py-2 flex flex-col items-center">
-      <div className="profile w-full rounded-full overflow-hidden aspect-square relative">
-        <Image src={session.user.image} fill />
-      </div>
-      <p className="font-semibold text-lg">{session.user.name}</p>
-    </div>
-  );
-};
-
-const FriendModal = ({ username, image, email, error, isOpen, closeModal }) => {
+const FriendModal = ({ username, image, email, error, isOpen, closeModal, sender }) => {
   const customStyles = {
     content: {
       top: "50%",
@@ -56,7 +30,7 @@ const FriendModal = ({ username, image, email, error, isOpen, closeModal }) => {
 
   return (
     <Modal contentLabel="Example Modal" isOpen={isOpen} style={customStyles}>
-      <div className="flex flex-col gap-2 ">
+      <div className="flex flex-col gap-3 ">
         {error ? (
           <>
             <p className="text-danger font-semibold text-center text-xl">{error}</p>
@@ -67,15 +41,23 @@ const FriendModal = ({ username, image, email, error, isOpen, closeModal }) => {
         ) : (
           <>
             <div className="profile flex justify-center">
-              <Image src={image} className="rounded-full" width={100} height={100}></Image>
+              <Image alt="profile" src={image} className="rounded-full" width={100} height={100}></Image>
             </div>
-            <div className="username">
-              <h1 className="text-bold text-center uppercase tracking-wider">{username}</h1>
-            </div>
-            <div className="email">
+            <div className="detail">
+              <h1 className="font-semibold text-2xl text-center uppercase tracking-wider">{username}</h1>
               <p className="text-subtext text-center">{email}</p>
             </div>
-            <button className="bg-accent text-white px-2 py-2 rounded font-semibold text-xl">
+            <button
+              className="bg-accent text-white px-2 py-2 rounded font-semibold text-xl"
+              onClick={async () => {
+                const { result, error } = await addFriend(sender.user.email, email);
+                toast.promise(addFriend(sender.user.email, email), {
+                  error: error,
+                  success: result,
+                  pending: "Sending Request...",
+                });
+              }}
+            >
               Add Friend <i className="fa-solid fa-plus"></i>
             </button>
             <button onClick={closeModal} className="text-white bg-danger px-2 py-2 rounded font-bold text-xl">
@@ -98,14 +80,13 @@ const Dashboard = ({ session, data, totalUser }) => {
 
   const openModal = () => setModalIsOpen(true);
   const closeModal = () => setModalIsOpen(false);
-  console.log(friendData);
 
-  const addFriend = async (e) => {
+  const searchFriend = async (e) => {
     try {
       e.preventDefault();
-      const res = await axios.post("/api/account/add", {
+      const res = await axios.post("/api/account/search", {
         email,
-        sender: session.user.email,
+        sender: session,
       });
 
       const { data } = res.data;
@@ -120,6 +101,8 @@ const Dashboard = ({ session, data, totalUser }) => {
   if (status === "authenticated") {
     return (
       <main id="root">
+        <ToastContainer />
+
         <div className="flex">
           <DashboardSideBar session={session} />
 
@@ -142,7 +125,7 @@ const Dashboard = ({ session, data, totalUser }) => {
                 <button
                   type="submit"
                   onClick={(e) => {
-                    addFriend(e);
+                    searchFriend(e);
                   }}
                 >
                   <i className="fa-solid fa-magnifying-glass text-subtext"></i>
@@ -152,9 +135,9 @@ const Dashboard = ({ session, data, totalUser }) => {
 
               {friendData ? (
                 friendData.error ? (
-                  <FriendModal error={friendData.error} isOpen={modalIsOpen} closeModal={closeModal} />
+                  <FriendModal error={friendData.error} isOpen={modalIsOpen} closeModal={closeModal} sender={session} />
                 ) : (
-                  <FriendModal username={friendData.username} email={friendData.email} image={friendData.images?.profile?.url || friendData.images?.profile?.buffer} isOpen={modalIsOpen} closeModal={closeModal} />
+                  <FriendModal username={friendData.username} email={friendData.email} image={friendData.images?.profile?.url || friendData.images?.profile?.buffer} isOpen={modalIsOpen} closeModal={closeModal} sender={session} />
                 )
               ) : (
                 <></>
@@ -276,6 +259,21 @@ const addProvider = async (session) => {
     return session;
   } else {
     return session;
+  }
+};
+
+const addFriend = async (senderEmail, recipientEmail) => {
+  try {
+    const res = await axios.post("/api/account/add", {
+      sender: senderEmail,
+      recipient: recipientEmail,
+    });
+
+    console.log(res.data);
+
+    return res.data;
+  } catch (error) {
+    return error.message;
   }
 };
 
