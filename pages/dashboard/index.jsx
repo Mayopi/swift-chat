@@ -4,8 +4,12 @@ import Link from "next/link";
 import axios from "axios";
 axios.defaults.baseURL = "http://127.0.0.1:3000";
 import { useRouter } from "next/router";
+import Modal from "react-modal";
 
 import DashboardSideBar from "@/shared/sidebar";
+import { useState } from "react";
+
+Modal.setAppElement("#root");
 
 const HeaderCard = ({ header, body, footer, icon }) => {
   return (
@@ -36,13 +40,86 @@ const CloseFriendItem = ({ session }) => {
   );
 };
 
+const FriendModal = ({ username, image, email, error, isOpen, closeModal }) => {
+  const customStyles = {
+    content: {
+      top: "50%",
+      left: "50%",
+      right: "auto",
+      bottom: "auto",
+      marginRight: "-50%",
+      transform: "translate(-50%, -50%)",
+      width: "60%", // contoh pengaturan lebar
+      height: "auto", // contoh pengaturan tinggi
+    },
+  };
+
+  return (
+    <Modal contentLabel="Example Modal" isOpen={isOpen} style={customStyles}>
+      <div className="flex flex-col gap-2 ">
+        {error ? (
+          <>
+            <p className="text-danger font-semibold text-center text-xl">{error}</p>
+            <button onClick={closeModal} className="text-white bg-danger px-2 py-2 rounded font-bold text-xl">
+              Close
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="profile flex justify-center">
+              <Image src={image} className="rounded-full" width={100} height={100}></Image>
+            </div>
+            <div className="username">
+              <h1 className="text-bold text-center uppercase tracking-wider">{username}</h1>
+            </div>
+            <div className="email">
+              <p className="text-subtext text-center">{email}</p>
+            </div>
+            <button className="bg-accent text-white px-2 py-2 rounded font-semibold text-xl">
+              Add Friend <i className="fa-solid fa-plus"></i>
+            </button>
+            <button onClick={closeModal} className="text-white bg-danger px-2 py-2 rounded font-bold text-xl">
+              Close
+            </button>
+          </>
+        )}
+      </div>
+    </Modal>
+  );
+};
+
 const Dashboard = ({ session, data, totalUser }) => {
   const { status } = useSession();
   const router = useRouter();
 
+  const [email, setEmail] = useState("");
+  const [friendData, setFriendData] = useState(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const openModal = () => setModalIsOpen(true);
+  const closeModal = () => setModalIsOpen(false);
+  console.log(friendData);
+
+  const addFriend = async (e) => {
+    try {
+      e.preventDefault();
+      const res = await axios.post("/api/account/add", {
+        email,
+        sender: session.user.email,
+      });
+
+      const { data } = res.data;
+      setFriendData(data);
+      openModal();
+    } catch (error) {
+      setFriendData(error.response.data);
+      openModal();
+    }
+  };
+
   if (status === "authenticated") {
     return (
-      <main>
+      <main id="root">
         <div className="flex">
           <DashboardSideBar session={session} />
 
@@ -61,13 +138,27 @@ const Dashboard = ({ session, data, totalUser }) => {
                   </button>
                 </Link>
               </div>
-
-              <form action="/api/account/add" method="POST" className="w-full lg:w-1/3 text-xl flex gap-2 items-center mt-5 border border-subtext px-3 rounded">
-                <button type="submit">
+              <form className="w-full lg:w-1/3 text-xl flex gap-2 items-center mt-5 border border-subtext px-3 rounded">
+                <button
+                  type="submit"
+                  onClick={(e) => {
+                    addFriend(e);
+                  }}
+                >
                   <i className="fa-solid fa-magnifying-glass text-subtext"></i>
                 </button>
-                <input type="email" className="border h-full w-full focus:outline-none py-1 px-1" placeholder="Find People" name="email" />
+                <input type="email" className="border h-full w-full focus:outline-none py-1 px-1" placeholder="Find People" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               </form>
+
+              {friendData ? (
+                friendData.error ? (
+                  <FriendModal error={friendData.error} isOpen={modalIsOpen} closeModal={closeModal} />
+                ) : (
+                  <FriendModal username={friendData.username} email={friendData.email} image={friendData.images?.profile?.url || friendData.images?.profile?.buffer} isOpen={modalIsOpen} closeModal={closeModal} />
+                )
+              ) : (
+                <></>
+              )}
             </section>
 
             <hr className="border-t-primary border-opacity-20 my-5" />

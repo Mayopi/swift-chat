@@ -36,6 +36,13 @@ const UserSchema = new Schema({
     },
   },
 
+  friendRequest: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+
   createdAt: {
     type: Date,
     default: Date.now(),

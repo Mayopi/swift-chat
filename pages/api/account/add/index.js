@@ -5,7 +5,15 @@ export default async function handler(req, res) {
   try {
     const connection = await connectMongoose();
 
-    const { email } = req.body;
+    const { email, sender } = req.body;
+
+    if (email === sender) {
+      return res.status(400).json({
+        message: "Failed",
+        status: 400,
+        error: "Cannot Add Friend for yourself",
+      });
+    }
 
     if (req.method !== "POST") {
       return res.status(400).json({
