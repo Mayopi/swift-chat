@@ -78,6 +78,9 @@ const LoginPage = ({ users }) => {
               Welcome Back <i className="fa-solid fa-exclamation"></i>
             </h2>
             <p className="text-subtext text-lg">Start Your Conversation Secretly</p>
+            <Link href={"/"} className="text-sky-500 hover:underline font-semibold">
+              Home
+            </Link>
 
             <label htmlFor="username">
               <p className="text-subtext text-lg mt-3">
